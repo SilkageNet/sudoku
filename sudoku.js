@@ -91,6 +91,7 @@ function parseArray(inputArray) {
 function getPossibleValues(point, pointMap, array) {
   const row = point[0];
   const column = point[1];
+  // 排除行列可能存在的值
   for (let i = 1; i <= 9; i++) {
     const rowValue = pointMap.get(`${row}:${i}`);
     if (!Array.isArray(rowValue)) {
@@ -109,6 +110,7 @@ function getPossibleValues(point, pointMap, array) {
       }
     }
   }
+  // 排除方块可能的值
   const rowStartIndex = Math.ceil(row / 3) * 3 - 2;
   const columnStartIndex = Math.ceil(column / 3) * 3 - 2;
   for (let rowIndex = rowStartIndex; rowIndex < rowStartIndex + 3; rowIndex++) {
@@ -139,11 +141,14 @@ function filter(pointMap) {
       pointArray.forEach(point => {
         const value = getPointValue(pointMap, point);
         if (!Array.isArray(value)) return;
+        // 查询可能存在的值
         const values = getPossibleValues(point, pointMap, value.concat());
+        // 若为长度0，说明已经出错了
         if (values.length == 0) {
-          // console.warn(`E:[${point[0]},${point[1]}]`);
+          console.warn(`E:[${point[0]},${point[1]}]`);
           throw new Error('out');
         }
+        // 若为长度1，说明肯定就只是唯一的值，那么就有必要再次过滤，因为map值变动，肯定就有需要再次计算其他的可能值
         if (values.length == 1) {
           goFlag = true;
           setPointValue(pointMap, point, values[0]);
@@ -206,13 +211,13 @@ function tryCase(pointMap) {
     if (!Array.isArray(value)) return;
     value.forEach(v => {
       if (stopFlag) return;
-      // console.log(`T:[${point[0]},${point[1]}]:${v}`);
+      console.log(`T:[${point[0]},${point[1]}]:${v}`);
       const tempMap = deepCopy(pointMap);
       setPointValue(tempMap, point, v);
       filter(tempMap);
       stopFlag = printMap(tempMap);
       if (stopFlag) {
-        // console.log(`S:[${point[0]},${point[1]}]:${v}`);
+        console.log(`S:[${point[0]},${point[1]}]:${v}`);
       }
     });
   });
